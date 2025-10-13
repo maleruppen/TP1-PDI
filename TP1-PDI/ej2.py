@@ -8,21 +8,32 @@ import matplotlib.pyplot as plt
 # Cargar imagen y umbralizar
 form = cv2.imread("formulario_05.png", cv2.IMREAD_GRAYSCALE)
 th = 160
-img_th = (form < th).astype(np.uint8)
+img_th = (form < th).astype(np.uint8) #binarizacion
 
 # Detección de líneas
 sum_rows = np.sum(img_th, axis=1)
 sum_cols = np.sum(img_th, axis=0)
 
+#umbral de deteccion
+#Define que una "línea" será cualquier pico en la proyección horizontal 
+# que alcance al menos el 60% del pico máximo encontrado. Esto filtra el ruido 
+# y el texto que no son líneas completas.
 th_row = 0.6 * np.max(sum_rows)
 th_col = 0.6 * np.max(sum_cols)
 
+#Crea una matriz booleana. True indica las filas que 
+# son parte de una línea horizontal detectada.
 rows_detect = sum_rows > th_row
 cols_detect = sum_cols > th_col
 
 # Obtener cambios (inicio/fin de líneas)
+#deteccion de bordes
+#Encuentra los puntos de inicio y fin de las líneas.
 row_changes = np.where(np.diff(rows_detect.astype(int)) != 0)[0]
 col_changes = np.where(np.diff(cols_detect.astype(int)) != 0)[0]
+#rows_detect.astype(int): Convierte True/False a 1/0
+#np.diff(): Calcula la diferencia entre píxeles adyacentes
+#np.where(...) Obtiene los índices de píxel (coordenadas Y) donde ocurre este cambio.
 
 # Agrupar líneas consecutivas (tomar el centro)
 horizontal_lines = []
@@ -44,14 +55,21 @@ print("VALIDACIÓN: NOMBRE Y APELLIDO")
 print("="*50)
 
 # Extraer el campo "Nombre y apellido" (fila 1, columna 2)
-padding = 3
-y1_nombre = horizontal_lines[1] + padding
-y2_nombre = horizontal_lines[2] - padding
-x1_nombre = vertical_lines[1] + padding
+padding = 3 
+#Define una pequeña separación (en píxeles) que se va a aplicar 
+#en todos los lados para no recortar justo en el borde de la celda. 
+#3 es un valor arbitrario: agrega 3 píxeles dentro del área definida 
+# por las líneas para evitar incluir bordes, marcas o ruido.
+y1_nombre = horizontal_lines[1] + padding #toma la seg línea hor, representa el borde sup de la fila 1.
+y2_nombre = horizontal_lines[2] - padding #borde inferior de la fila 1
+x1_nombre = vertical_lines[1] + padding #borde izquierdo de la columna 2. padding para no incluir la línea vertical en el recorte
 x2_nombre = vertical_lines[2] - padding if len(vertical_lines) > 2 else vertical_lines[-1]
+#el borde derecho de la columna 2, con padding hacia adentro. Si NO existe una tercera línea, 
+# entonces usa la última coordenada disponible como extremo derecho.
 
 # Recortar y obtener el nombre. 
-nombre_region = form[y1_nombre:y2_nombre, x1_nombre:x2_nombre]
+nombre_region = form[y1_nombre:y2_nombre, x1_nombre:x2_nombre] 
+#nueva imagen (submatriz) que contiene sólo la región interior de la celda correspondiente al campo “Nombre y apellido”.
 
 # Obtener la imagen binarizada.(Píxeles que estén dentro de las letras pasan a valer 1)
 _, binary_nombre = cv2.threshold(nombre_region, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
