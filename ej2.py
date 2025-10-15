@@ -170,7 +170,7 @@ def detectar_campo(form, y1, y2, x1, x2, nombre_campo, min_area=5, min_area_espe
 
 
 # ========== CARGAR Y PROCESAR FORMULARIO ==========
-form = cv2.imread("TP1-PDI/formulario_01.png", cv2.IMREAD_GRAYSCALE)
+form = cv2.imread("formulario_01.png", cv2.IMREAD_GRAYSCALE)
 th = 160
 img_th = (form < th).astype(np.uint8)
 
