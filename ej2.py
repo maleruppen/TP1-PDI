@@ -87,7 +87,7 @@ plt.show()
 
 
 # --- 3. Función de Análisis  ---
-def analizar_celda(celda_img, min_area=30, max_area=3000):
+def analizar_celda(celda_img, th_min_area=30, th_max_area=3000, space_threshold=6):
     """
     Analiza una celda.
     - Filtra por área MÍNIMA (ruido) y MÁXIMA (manchas/líneas).
@@ -98,18 +98,49 @@ def analizar_celda(celda_img, min_area=30, max_area=3000):
     if h <= 2*padding or w <= 2*padding: return 0
     celda_recortada = celda_img[padding:h-padding, padding:w-padding]
 
+    #umbralado
     _, binary = cv2.threshold(celda_recortada, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    
+    #componentes conectadas
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, 8, cv2.CV_32S)
     
-    caracteres_validos = 0
-    for i in range(1, num_labels):
-        area = stats[i, cv2.CC_STAT_AREA]
-        # Filtro de área (clave para ignorar líneas y ruido)
-        if area > min_area and area < max_area:
-            caracteres_validos += 1
+    # Filtro de área (# --- Filtrado vectorizado por área
+    ix_area = (stats[:, -1] > th_min_area) & (stats[:, -1] < th_max_area)
+    stats = stats[ix_area, :]      # Filtramos solo las componentes válidas
+    caracteres_validos = len(stats -1) # resto 1 para ignorar el fondo (label 0)
+
+
+    # Si no hay caracteres válidos, retornamos 0 caracteres y 0 palabras.
+    if caracteres_validos == 0:
+        return 0, 0
+    
+    # --- Lógica de Detección de Palabras basada en Distancia ---
+
+    # Ordenar las componentes de izquierda a derecha (basado en pos_x, índice 0)
+    sorted_stats = stats[np.argsort(stats[:, cv2.CC_STAT_LEFT])]
+    
+    # Calcular palabras
+    # Si hay caracteres válidos, hay al menos una palabra.
+    palabras = 1 
+    
+    # Iteramos hasta el penúltimo carácter para comparar pares
+    for i in range(caracteres_validos - 1):
+        # Posición X del borde izquierdo de la letra actual
+        x_i = sorted_stats[i, cv2.CC_STAT_LEFT]
+        #Ancho de la letra actual
+        w_i = sorted_stats[i, cv2.CC_STAT_WIDTH] 
+        
+        # Posición X del borde izquierdo de la letra siguiente
+        x_j = sorted_stats[i+1, cv2.CC_STAT_LEFT]
+        
+        # Distancia horizontal: Inicio de j - (Inicio de i + Ancho de i)
+        distancia = x_j - (x_i + w_i)
+
+        # Si la distancia supera el umbral, contamos una nueva palabra
+        if distancia > space_threshold:
+            palabras += 1
             
-    return caracteres_validos
+    # 7. Retornar caracteres y palabras
+    return caracteres_validos, palabras
 
 # ------
 try:
@@ -119,67 +150,67 @@ try:
     y1_nom, y2_nom = horizontal_lines[1], horizontal_lines[2]
     x1_nom_1, x2_nom_1 = vertical_lines[1], vertical_lines[3]
     celda_nombre_1 = img[y1_nom:y2_nom, x1_nom_1:x2_nom_1]
-    chars_nombre = analizar_celda(celda_nombre_1, min_area=20) 
+    chars_nombre = analizar_celda(celda_nombre_1, th_min_area=20) 
     
     # --- "Edad" (Fila 3, Campo Angosto) ---
     y1_edad, y2_edad = horizontal_lines[2], horizontal_lines[3]
     x1_edad, x2_edad = vertical_lines[1], vertical_lines[3]
     celda_edad = img[y1_edad:y2_edad, x1_edad:x2_edad]
-    chars_edad = analizar_celda(celda_edad, min_area=30)
+    chars_edad = analizar_celda(celda_edad, th_min_area=30)
 
     # --- "Mail" (Fila 4, Campo Ancho) ---
     y1_mail, y2_mail = horizontal_lines[3], horizontal_lines[4]
     x1_mail_1, x2_mail_1 = vertical_lines[1], vertical_lines[3]
     celda_mail_1 = img[y1_mail:y2_mail, x1_mail_1:x2_mail_1]
-    chars_mail = analizar_celda(celda_mail_1, min_area=5) 
+    chars_mail = analizar_celda(celda_mail_1, th_min_area=5) 
     
     # --- "Legajo" (Fila 5, Campo Angosto) ---
     y1_leg, y2_leg = horizontal_lines[4], horizontal_lines[5]
     x1_leg, x2_leg = vertical_lines[1], vertical_lines[3]
     celda_legajo = img[y1_leg:y2_leg, x1_leg:x2_leg]
-    chars_legajo = analizar_celda(celda_legajo, min_area=10)
+    chars_legajo = analizar_celda(celda_legajo, th_min_area=10)
 
     # --- "comentarios"  ---
     y1_com, y2_com = horizontal_lines[-2], horizontal_lines[-1]
     x1_com, x2_com = vertical_lines[1], vertical_lines[3]
     celda_com = img[y1_com:y2_com, x1_com:x2_com]
-    chars_com = analizar_celda(celda_com, min_area=10)
+    chars_com = analizar_celda(celda_com, th_min_area=10)
 
     # --- "p1-si"  ---
     y1_p1s, y2_p1s = horizontal_lines[6], horizontal_lines[7]
     x1_p1s, x2_p1s = vertical_lines[1], vertical_lines[2]
     celda_p1s = img[y1_p1s:y2_p1s, x1_p1s:x2_p1s]
-    chars_p1s = analizar_celda(celda_p1s, min_area=10)
+    chars_p1s = analizar_celda(celda_p1s, th_min_area=10)
 
     # --- "p1-no"  ---
     y1_p1n, y2_p1n = horizontal_lines[6], horizontal_lines[7]
     x1_p1n, x2_p1n = vertical_lines[2], vertical_lines[3]
     celda_p1n = img[y1_p1n:y2_p1n, x1_p1n:x2_p1n]
-    chars_p1n = analizar_celda(celda_p1n, min_area=10)
+    chars_p1n = analizar_celda(celda_p1n, th_min_area=10)
 
     # --- "p2-si"  ---
     y1_p2s, y2_p2s = horizontal_lines[7], horizontal_lines[8]
     x1_p2s, x2_p2s = vertical_lines[1], vertical_lines[2]
     celda_p2s = img[y1_p2s:y2_p2s, x1_p2s:x2_p2s]
-    chars_p2s = analizar_celda(celda_p2s, min_area=10)
+    chars_p2s = analizar_celda(celda_p2s, th_min_area=10)
 
     # --- "p2-no"  ---
     y1_p2n, y2_p2n = horizontal_lines[7], horizontal_lines[8]
     x1_p2n, x2_p2n = vertical_lines[2], vertical_lines[3]
     celda_p2n = img[y1_p2n:y2_p2n, x1_p2n:x2_p2n]
-    chars_p2n = analizar_celda(celda_p2n, min_area=10)
+    chars_p2n = analizar_celda(celda_p2n, th_min_area=10)
 
     # --- "p3-si"  ---
     y1_p3s, y2_p3s = horizontal_lines[8], horizontal_lines[9]
     x1_p3s, x2_p3s = vertical_lines[1], vertical_lines[2]
     celda_p3s = img[y1_p3s:y2_p3s, x1_p3s:x2_p3s]
-    chars_p3s = analizar_celda(celda_p3s, min_area=10)
+    chars_p3s = analizar_celda(celda_p3s, th_min_area=10)
 
     # --- "p1-no"  ---
     y1_p3n, y2_p3n = horizontal_lines[8], horizontal_lines[9]
     x1_p3n, x2_p3n = vertical_lines[2], vertical_lines[3]
     celda_p3n = img[y1_p3n:y2_p3n, x1_p3n:x2_p3n]
-    chars_p3n = analizar_celda(celda_p3n, min_area=10)
+    chars_p3n = analizar_celda(celda_p3n, th_min_area=10)
 
     #plt.figure(), plt.imshow(celda_p1n, cmap='gray'), plt.show() 
     
