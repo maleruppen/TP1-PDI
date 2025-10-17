@@ -139,42 +139,111 @@ try:
     celda_legajo = img[y1_leg:y2_leg, x1_leg:x2_leg]
     chars_legajo = analizar_celda(celda_legajo, min_area=10)
 
-    # --- "comentarios" (Fila 5, Campo Angosto) ---
+    # --- "comentarios"  ---
     y1_com, y2_com = horizontal_lines[-2], horizontal_lines[-1]
     x1_com, x2_com = vertical_lines[1], vertical_lines[3]
     celda_com = img[y1_com:y2_com, x1_com:x2_com]
     chars_com = analizar_celda(celda_com, min_area=10)
+
+    # --- "p1-si"  ---
+    y1_p1s, y2_p1s = horizontal_lines[6], horizontal_lines[7]
+    x1_p1s, x2_p1s = vertical_lines[1], vertical_lines[2]
+    celda_p1s = img[y1_p1s:y2_p1s, x1_p1s:x2_p1s]
+    chars_p1s = analizar_celda(celda_p1s, min_area=10)
+
+    # --- "p1-no"  ---
+    y1_p1n, y2_p1n = horizontal_lines[6], horizontal_lines[7]
+    x1_p1n, x2_p1n = vertical_lines[2], vertical_lines[3]
+    celda_p1n = img[y1_p1n:y2_p1n, x1_p1n:x2_p1n]
+    chars_p1n = analizar_celda(celda_p1n, min_area=10)
+
+    # --- "p2-si"  ---
+    y1_p2s, y2_p2s = horizontal_lines[7], horizontal_lines[8]
+    x1_p2s, x2_p2s = vertical_lines[1], vertical_lines[2]
+    celda_p2s = img[y1_p2s:y2_p2s, x1_p2s:x2_p2s]
+    chars_p2s = analizar_celda(celda_p2s, min_area=10)
+
+    # --- "p2-no"  ---
+    y1_p2n, y2_p2n = horizontal_lines[7], horizontal_lines[8]
+    x1_p2n, x2_p2n = vertical_lines[2], vertical_lines[3]
+    celda_p2n = img[y1_p2n:y2_p2n, x1_p2n:x2_p2n]
+    chars_p2n = analizar_celda(celda_p2n, min_area=10)
+
+    # --- "p3-si"  ---
+    y1_p3s, y2_p3s = horizontal_lines[8], horizontal_lines[9]
+    x1_p3s, x2_p3s = vertical_lines[1], vertical_lines[2]
+    celda_p3s = img[y1_p3s:y2_p3s, x1_p3s:x2_p3s]
+    chars_p3s = analizar_celda(celda_p3s, min_area=10)
+
+    # --- "p1-no"  ---
+    y1_p3n, y2_p3n = horizontal_lines[8], horizontal_lines[9]
+    x1_p3n, x2_p3n = vertical_lines[2], vertical_lines[3]
+    celda_p3n = img[y1_p3n:y2_p3n, x1_p3n:x2_p3n]
+    chars_p3n = analizar_celda(celda_p3n, min_area=10)
+
+    #plt.figure(), plt.imshow(celda_p1n, cmap='gray'), plt.show() 
     
     # --- Mostrar Resultados ---
     plt.figure(figsize=(12, 8))
     plt.suptitle("Análisis de Celdas de Texto (Corregido)", fontsize=16)
     
-    plt.subplot(3, 2, 1)
+    plt.subplot(4, 4, 1)
     plt.imshow(img[y1_nom:y2_nom, vertical_lines[1]:vertical_lines[3]], cmap='gray')
     plt.title(f"'Nombre y Apellido' (Detectados: {chars_nombre})")
     plt.axis('off')
 
-    plt.subplot(3, 2, 2)
+    plt.subplot(4, 4, 2)
     plt.imshow(celda_edad, cmap='gray')
     plt.title(f"'Edad' (Detectados: {chars_edad})")
     plt.axis('off')
 
-    plt.subplot(3, 2, 3)
+    plt.subplot(4, 4, 3)
     plt.imshow(img[y1_mail:y2_mail, vertical_lines[1]:vertical_lines[3]], cmap='gray')
     plt.title(f"'Mail' (Detectados: {chars_mail})")
     plt.axis('off')
     
-    plt.subplot(3, 2, 4)
+    plt.subplot(4, 4, 4)
     plt.imshow(celda_legajo, cmap='gray')
     plt.title(f"'Legajo' (Detectados: {chars_legajo})")
     plt.axis('off')
 
-    plt.subplot(3, 2, 5)
+    plt.subplot(4, 4, 5)
     plt.imshow(celda_com, cmap='gray')
     plt.title(f"'comentarios' (Detectados: {chars_com})")
     plt.axis('off')
-    
 
+    # --- preguntas -----
+
+    plt.subplot(4, 4, 6)
+    plt.imshow(celda_p1s, cmap='gray')
+    plt.title(f"'p1s' (Detectados: {chars_p1s})")
+    plt.axis('off')
+
+    plt.subplot(4, 4, 7)
+    plt.imshow(celda_p1n, cmap='gray')
+    plt.title(f"'p1n' (Detectados: {chars_p1n})")
+    plt.axis('off')
+
+    plt.subplot(4, 4, 8)
+    plt.imshow(celda_p2s, cmap='gray')
+    plt.title(f"'p2s' (Detectados: {chars_p2s})")
+    plt.axis('off')
+
+    plt.subplot(4, 4, 9)
+    plt.imshow(celda_p2n, cmap='gray')
+    plt.title(f"'p2n' (Detectados: {chars_p2n})")
+    plt.axis('off')
+
+    plt.subplot(4, 4, 10)
+    plt.imshow(celda_p3s, cmap='gray')
+    plt.title(f"'p3s' (Detectados: {chars_p3s})")
+    plt.axis('off')
+
+    plt.subplot(4, 4, 11)
+    plt.imshow(celda_p3n, cmap='gray')
+    plt.title(f"'p3n' (Detectados: {chars_p3n})")
+    plt.axis('off')
+    
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.show()
 
