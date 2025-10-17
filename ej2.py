@@ -16,15 +16,12 @@ for i in range(0, len(row_changes) - 1, 2):
     center = (row_changes[i] + row_changes[i+1]) // 2
     horizontal_lines.append(center)
 
-
-# ===================================================================
 # ---  Detección de Columnas -----
-# ===================================================================
 
 # Usamos la misma técnica de proyección, pero en el eje 0 (columnas)
 img_col_zeros = img_zeros.sum(axis=0)
 
-# Usamos un umbral. 0.6 es un buen punto de partida.
+# Usamos un umbral. 0.35 es un buen punto de partida.
 th_col = 0.35 * np.max(img_col_zeros) 
 cols_detect = img_col_zeros > th_col
 col_changes = np.where(np.diff(cols_detect.astype(int)) != 0)[0]
@@ -106,7 +103,6 @@ def analizar_celda(celda_img, th_min_area=30, th_max_area=3000, space_threshold=
     stats = stats[ix_area, :]      # Filtramos solo las componentes válidas
     caracteres_validos = len(stats -1) # resto 1 para ignorar el fondo (label 0)
 
-
     # Si no hay caracteres válidos, retornamos 0 caracteres y 0 palabras.
     if caracteres_validos == 0:
         return 0, 0
@@ -126,7 +122,6 @@ def analizar_celda(celda_img, th_min_area=30, th_max_area=3000, space_threshold=
         x_i = sorted_stats[i, cv2.CC_STAT_LEFT]
         #Ancho de la letra actual
         w_i = sorted_stats[i, cv2.CC_STAT_WIDTH] 
-        
         # Posición X del borde izquierdo de la letra siguiente
         x_j = sorted_stats[i+1, cv2.CC_STAT_LEFT]
         
@@ -178,13 +173,13 @@ try:
     y1_p1s, y2_p1s = horizontal_lines[6], horizontal_lines[7]
     x1_p1s, x2_p1s = vertical_lines[1], vertical_lines[2]
     celda_p1s = img[y1_p1s:y2_p1s, x1_p1s:x2_p1s]
-    chars_p1s, words_ps1 = analizar_celda(celda_p1s, th_min_area=10)
+    chars_p1s, words_p1s = analizar_celda(celda_p1s, th_min_area=10)
 
     # --- "p1-no"  ---
     y1_p1n, y2_p1n = horizontal_lines[6], horizontal_lines[7]
     x1_p1n, x2_p1n = vertical_lines[2], vertical_lines[3]
     celda_p1n = img[y1_p1n:y2_p1n, x1_p1n:x2_p1n]
-    chars_p1n, words_p2n = analizar_celda(celda_p1n, th_min_area=10)
+    chars_p1n, words_p1n = analizar_celda(celda_p1n, th_min_area=10)
 
     # --- "p2-si"  ---
     y1_p2s, y2_p2s = horizontal_lines[7], horizontal_lines[8]
@@ -218,59 +213,59 @@ try:
     
     plt.subplot(4, 4, 1)
     plt.imshow(img[y1_nom:y2_nom, vertical_lines[1]:vertical_lines[3]], cmap='gray')
-    plt.title(f"'Nombre y Apellido' (Detectados: {chars_nombre})")
+    plt.title(f"'Nombre y Apellido' (Detectados: {chars_nombre, words_nombre})")
     plt.axis('off')
 
     plt.subplot(4, 4, 2)
     plt.imshow(celda_edad, cmap='gray')
-    plt.title(f"'Edad' (Detectados: {chars_edad})")
+    plt.title(f"'Edad' (Detectados: {chars_edad, words_edad})")
     plt.axis('off')
 
     plt.subplot(4, 4, 3)
     plt.imshow(img[y1_mail:y2_mail, vertical_lines[1]:vertical_lines[3]], cmap='gray')
-    plt.title(f"'Mail' (Detectados: {chars_mail})")
+    plt.title(f"'Mail' (Detectados: {chars_mail, words_mail})")
     plt.axis('off')
     
     plt.subplot(4, 4, 4)
     plt.imshow(celda_legajo, cmap='gray')
-    plt.title(f"'Legajo' (Detectados: {chars_legajo})")
+    plt.title(f"'Legajo' (Detectados: {chars_legajo, words_legajo})")
     plt.axis('off')
 
     plt.subplot(4, 4, 5)
     plt.imshow(celda_com, cmap='gray')
-    plt.title(f"'comentarios' (Detectados: {chars_com})")
+    plt.title(f"'comentarios' (Detectados: {chars_com, words_comentarios})")
     plt.axis('off')
 
     # --- preguntas -----
 
     plt.subplot(4, 4, 6)
     plt.imshow(celda_p1s, cmap='gray')
-    plt.title(f"'p1s' (Detectados: {chars_p1s})")
+    plt.title(f"'p1s' (Detectados: {chars_p1s, words_p1s})")
     plt.axis('off')
 
     plt.subplot(4, 4, 7)
     plt.imshow(celda_p1n, cmap='gray')
-    plt.title(f"'p1n' (Detectados: {chars_p1n})")
+    plt.title(f"'p1n' (Detectados: {chars_p1n, words_p1n})")
     plt.axis('off')
 
     plt.subplot(4, 4, 8)
     plt.imshow(celda_p2s, cmap='gray')
-    plt.title(f"'p2s' (Detectados: {chars_p2s})")
+    plt.title(f"'p2s' (Detectados: {chars_p2s, words_p2s})")
     plt.axis('off')
 
     plt.subplot(4, 4, 9)
     plt.imshow(celda_p2n, cmap='gray')
-    plt.title(f"'p2n' (Detectados: {chars_p2n})")
+    plt.title(f"'p2n' (Detectados: {chars_p2n, words_p2n})")
     plt.axis('off')
 
     plt.subplot(4, 4, 10)
     plt.imshow(celda_p3s, cmap='gray')
-    plt.title(f"'p3s' (Detectados: {chars_p3s})")
+    plt.title(f"'p3s' (Detectados: {chars_p3s, words_p3s})")
     plt.axis('off')
 
     plt.subplot(4, 4, 11)
     plt.imshow(celda_p3n, cmap='gray')
-    plt.title(f"'p3n' (Detectados: {chars_p3n})")
+    plt.title(f"'p3n' (Detectados: {chars_p3n, words_p3n})")
     plt.axis('off')
     
     plt.tight_layout(rect=[0, 0, 1, 0.95])
@@ -280,3 +275,82 @@ except IndexError:
     print("\n--- ¡ERROR! ---")
     print("La detección de líneas falló. No se encontraron suficientes filas o columnas.")
     print(f"Líneas H: {len(horizontal_lines)}, Líneas V: {len(vertical_lines)}")
+
+def validar_formulario(chars_nombre, words_nombre, 
+                       chars_edad, words_edad, 
+                       chars_mail, words_mail, 
+                       chars_legajo, words_legajo, 
+                       chars_comentarios, words_comentarios, 
+                       chars_p1s, chars_p1n, 
+                       chars_p2s, chars_p2n,
+                       chars_p3s, chars_p3n):
+    
+    """
+    Aplica las condiciones de validación a todos los campos del formulario.
+
+    Retorna:
+        dict: Un diccionario con el resultado de la validación (True/False) para cada campo.
+    """
+
+    # --- Lógica de Validación (Se devuelve True/False, no 'OK'/'MAL') ---
+
+    # a. Nombre y Apellido: Mín. 2 palabras, Máx. 25 caracteres.
+    val_nom = (words_nombre >= 2) and (chars_nombre <= 25)
+
+    # b. Edad: 2 o 3 caracteres.
+    val_edad = (chars_edad == 2) or (chars_edad == 3)
+
+    # c. Mail: 1 palabra, Máx. 25 caracteres.
+    val_mail = (words_mail == 1) and (chars_mail <= 25)
+
+    # d. Legajo: 8 caracteres, 1 palabra.
+    val_legajo = (chars_legajo == 8) and (words_legajo == 1)
+
+    # f. Comentarios: Mín. 1 palabra, Máx. 25 caracteres.
+    val_com = (words_comentarios >= 1) and (chars_comentarios <= 25)
+    
+    # e. Preguntas 1, 2 y 3: Única celda marcada (Si=1 XOR No=1).
+    val_p1 = (chars_p1s == 1) ^ (chars_p1n == 1) 
+    val_p2 = (chars_p2s == 1) ^ (chars_p2n == 1)
+    val_p3 = (chars_p3s == 1) ^ (chars_p3n == 1)
+
+    # --- Retorno de Resultados ---
+    return {
+        "Nombre y apellido": val_nom,
+        "Edad": val_edad,
+        "Mail": val_mail,
+        "Legajo": val_legajo,
+        "Pregunta 1": val_p1,
+        "Pregunta 2": val_p2,
+        "Pregunta 3": val_p3,
+        "Comentarios": val_com,
+        "FORMULARIO_COMPLETO_OK": (val_nom and val_edad and val_mail and val_legajo and val_com and val_p1 and val_p2 and val_p3)
+    }
+
+# ----------------------------------------------------------------------
+# --- BLOQUE DE EJECUCIÓN 
+# ----------------------------------------------------------------------
+
+# Ejecutar la validación
+resultados_validacion = validar_formulario(
+    chars_nombre, words_nombre, 
+    chars_edad, words_edad, 
+    chars_mail, words_mail, 
+    chars_legajo, words_legajo, 
+    chars_com, words_comentarios, 
+    chars_p1s, chars_p1n, 
+    chars_p2s, chars_p2n,
+    chars_p3s, chars_p3n
+)
+
+# 3. Imprimir los resultados en el formato solicitado
+print("\n--- RESULTADOS DE LA VALIDACIÓN ---")
+
+# Iteramos sobre el diccionario. 
+for campo, estado in resultados_validacion.items():
+    if campo != "FORMULARIO_COMPLETO_OK":
+        # CONVERTIMOS True/False a OK/MAL
+        estado_str = "OK" if estado else "MAL"
+        print(f"> {campo}: {estado_str}")
+        
+print("---------------------------------")
