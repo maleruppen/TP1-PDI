@@ -84,8 +84,6 @@ plt.tight_layout(rect=[0, 0, 1, 0.95])
 plt.show()
 
 
-
-
 # --- 3. Función de Análisis  ---
 def analizar_celda(celda_img, th_min_area=30, th_max_area=3000, space_threshold=6):
     """
@@ -150,67 +148,67 @@ try:
     y1_nom, y2_nom = horizontal_lines[1], horizontal_lines[2]
     x1_nom_1, x2_nom_1 = vertical_lines[1], vertical_lines[3]
     celda_nombre_1 = img[y1_nom:y2_nom, x1_nom_1:x2_nom_1]
-    chars_nombre = analizar_celda(celda_nombre_1, th_min_area=20) 
+    chars_nombre, words_nombre = analizar_celda(celda_nombre_1, th_min_area=20) 
     
     # --- "Edad" (Fila 3, Campo Angosto) ---
     y1_edad, y2_edad = horizontal_lines[2], horizontal_lines[3]
     x1_edad, x2_edad = vertical_lines[1], vertical_lines[3]
     celda_edad = img[y1_edad:y2_edad, x1_edad:x2_edad]
-    chars_edad = analizar_celda(celda_edad, th_min_area=30)
+    chars_edad, words_edad = analizar_celda(celda_edad, th_min_area=30)
 
     # --- "Mail" (Fila 4, Campo Ancho) ---
     y1_mail, y2_mail = horizontal_lines[3], horizontal_lines[4]
     x1_mail_1, x2_mail_1 = vertical_lines[1], vertical_lines[3]
     celda_mail_1 = img[y1_mail:y2_mail, x1_mail_1:x2_mail_1]
-    chars_mail = analizar_celda(celda_mail_1, th_min_area=5) 
+    chars_mail, words_mail = analizar_celda(celda_mail_1, th_min_area=5) 
     
     # --- "Legajo" (Fila 5, Campo Angosto) ---
     y1_leg, y2_leg = horizontal_lines[4], horizontal_lines[5]
     x1_leg, x2_leg = vertical_lines[1], vertical_lines[3]
     celda_legajo = img[y1_leg:y2_leg, x1_leg:x2_leg]
-    chars_legajo = analizar_celda(celda_legajo, th_min_area=10)
+    chars_legajo, words_legajo = analizar_celda(celda_legajo, th_min_area=10)
 
     # --- "comentarios"  ---
     y1_com, y2_com = horizontal_lines[-2], horizontal_lines[-1]
     x1_com, x2_com = vertical_lines[1], vertical_lines[3]
     celda_com = img[y1_com:y2_com, x1_com:x2_com]
-    chars_com = analizar_celda(celda_com, th_min_area=10)
+    chars_com, words_comentarios = analizar_celda(celda_com, th_min_area=10)
 
     # --- "p1-si"  ---
     y1_p1s, y2_p1s = horizontal_lines[6], horizontal_lines[7]
     x1_p1s, x2_p1s = vertical_lines[1], vertical_lines[2]
     celda_p1s = img[y1_p1s:y2_p1s, x1_p1s:x2_p1s]
-    chars_p1s = analizar_celda(celda_p1s, th_min_area=10)
+    chars_p1s, words_ps1 = analizar_celda(celda_p1s, th_min_area=10)
 
     # --- "p1-no"  ---
     y1_p1n, y2_p1n = horizontal_lines[6], horizontal_lines[7]
     x1_p1n, x2_p1n = vertical_lines[2], vertical_lines[3]
     celda_p1n = img[y1_p1n:y2_p1n, x1_p1n:x2_p1n]
-    chars_p1n = analizar_celda(celda_p1n, th_min_area=10)
+    chars_p1n, words_p2n = analizar_celda(celda_p1n, th_min_area=10)
 
     # --- "p2-si"  ---
     y1_p2s, y2_p2s = horizontal_lines[7], horizontal_lines[8]
     x1_p2s, x2_p2s = vertical_lines[1], vertical_lines[2]
     celda_p2s = img[y1_p2s:y2_p2s, x1_p2s:x2_p2s]
-    chars_p2s = analizar_celda(celda_p2s, th_min_area=10)
+    chars_p2s, words_p2s = analizar_celda(celda_p2s, th_min_area=10)
 
     # --- "p2-no"  ---
     y1_p2n, y2_p2n = horizontal_lines[7], horizontal_lines[8]
     x1_p2n, x2_p2n = vertical_lines[2], vertical_lines[3]
     celda_p2n = img[y1_p2n:y2_p2n, x1_p2n:x2_p2n]
-    chars_p2n = analizar_celda(celda_p2n, th_min_area=10)
+    chars_p2n, words_p2n = analizar_celda(celda_p2n, th_min_area=10)
 
     # --- "p3-si"  ---
     y1_p3s, y2_p3s = horizontal_lines[8], horizontal_lines[9]
     x1_p3s, x2_p3s = vertical_lines[1], vertical_lines[2]
     celda_p3s = img[y1_p3s:y2_p3s, x1_p3s:x2_p3s]
-    chars_p3s = analizar_celda(celda_p3s, th_min_area=10)
+    chars_p3s, words_p3s = analizar_celda(celda_p3s, th_min_area=10)
 
-    # --- "p1-no"  ---
+    # --- "p3-no"  ---
     y1_p3n, y2_p3n = horizontal_lines[8], horizontal_lines[9]
     x1_p3n, x2_p3n = vertical_lines[2], vertical_lines[3]
     celda_p3n = img[y1_p3n:y2_p3n, x1_p3n:x2_p3n]
-    chars_p3n = analizar_celda(celda_p3n, th_min_area=10)
+    chars_p3n, words_p3n = analizar_celda(celda_p3n, th_min_area=10)
 
     #plt.figure(), plt.imshow(celda_p1n, cmap='gray'), plt.show() 
     
