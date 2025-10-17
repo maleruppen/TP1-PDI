@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # ---  Detección de Filas  ---
-img = cv2.imread('formulario_04.png', cv2.IMREAD_GRAYSCALE) 
+img = cv2.imread('formulario_02.png', cv2.IMREAD_GRAYSCALE) 
 img_zeros = img < 120
 img_row_zeros = img_zeros.sum(axis=1)
 
@@ -86,24 +86,19 @@ plt.show()
 
 
 
-# --- 3. Función de Análisis (MEJORADA con Dilatación) ---
-def analizar_celda(celda_img, min_area=30, max_area=3000, dilate_iter=0):
+# --- 3. Función de Análisis  ---
+def analizar_celda(celda_img, min_area=30, max_area=3000):
     """
     Analiza una celda.
-    - dilate_iter: Si es > 0, aplica dilatación para conectar trazos rotos.
     - Filtra por área MÍNIMA (ruido) y MÁXIMA (manchas/líneas).
     """
+    # quita un poco de los bordes
     padding = 3
     h, w = celda_img.shape
     if h <= 2*padding or w <= 2*padding: return 0
     celda_recortada = celda_img[padding:h-padding, padding:w-padding]
 
     _, binary = cv2.threshold(celda_recortada, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    
-    # --- (NUEVO) Dilatación para conectar trazos rotos ---
-    if dilate_iter > 0:
-        kernel = np.ones((3,3), np.uint8)
-        binary = cv2.dilate(binary, kernel, iterations=dilate_iter)
     
     num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, 8, cv2.CV_32S)
     
@@ -116,7 +111,7 @@ def analizar_celda(celda_img, min_area=30, max_area=3000, dilate_iter=0):
             
     return caracteres_validos
 
-# --- 4. TAREA "PASO A PASO": Analizar los 4 campos de texto (CORREGIDO) ---
+# ------
 try:
     print("\n--- PASO A PASO: Analizando Campos de Texto ---")
     
@@ -130,7 +125,7 @@ try:
     y1_edad, y2_edad = horizontal_lines[2], horizontal_lines[3]
     x1_edad, x2_edad = vertical_lines[1], vertical_lines[3]
     celda_edad = img[y1_edad:y2_edad, x1_edad:x2_edad]
-    chars_edad = analizar_celda(celda_edad, min_area=50, dilate_iter=1)
+    chars_edad = analizar_celda(celda_edad, min_area=30)
 
     # --- "Mail" (Fila 4, Campo Ancho) ---
     y1_mail, y2_mail = horizontal_lines[3], horizontal_lines[4]
@@ -143,31 +138,43 @@ try:
     x1_leg, x2_leg = vertical_lines[1], vertical_lines[3]
     celda_legajo = img[y1_leg:y2_leg, x1_leg:x2_leg]
     chars_legajo = analizar_celda(celda_legajo, min_area=10)
+
+    # --- "comentarios" (Fila 5, Campo Angosto) ---
+    y1_com, y2_com = horizontal_lines[-2], horizontal_lines[-1]
+    x1_com, x2_com = vertical_lines[1], vertical_lines[3]
+    celda_com = img[y1_com:y2_com, x1_com:x2_com]
+    chars_com = analizar_celda(celda_com, min_area=10)
     
     # --- Mostrar Resultados ---
     plt.figure(figsize=(12, 8))
     plt.suptitle("Análisis de Celdas de Texto (Corregido)", fontsize=16)
     
-    plt.subplot(2, 2, 1)
+    plt.subplot(3, 2, 1)
     plt.imshow(img[y1_nom:y2_nom, vertical_lines[1]:vertical_lines[3]], cmap='gray')
     plt.title(f"'Nombre y Apellido' (Detectados: {chars_nombre})")
     plt.axis('off')
 
-    plt.subplot(2, 2, 2)
+    plt.subplot(3, 2, 2)
     plt.imshow(celda_edad, cmap='gray')
     plt.title(f"'Edad' (Detectados: {chars_edad})")
     plt.axis('off')
 
-    plt.subplot(2, 2, 3)
+    plt.subplot(3, 2, 3)
     plt.imshow(img[y1_mail:y2_mail, vertical_lines[1]:vertical_lines[3]], cmap='gray')
     plt.title(f"'Mail' (Detectados: {chars_mail})")
     plt.axis('off')
     
-    plt.subplot(2, 2, 4)
+    plt.subplot(3, 2, 4)
     plt.imshow(celda_legajo, cmap='gray')
     plt.title(f"'Legajo' (Detectados: {chars_legajo})")
     plt.axis('off')
+
+    plt.subplot(3, 2, 5)
+    plt.imshow(celda_com, cmap='gray')
+    plt.title(f"'comentarios' (Detectados: {chars_com})")
+    plt.axis('off')
     
+
     plt.tight_layout(rect=[0, 0, 1, 0.95])
     plt.show()
 
