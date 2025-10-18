@@ -4,21 +4,37 @@ import matplotlib.pyplot as plt
 import csv
 
 # Definición de función que se usará para analizar cada celda. 
-def analizar_celda(celda_img, th_min_area=30, th_max_area=3000, space_threshold=6):
+def analizar_celda(celda_img, th_min_area=30, th_max_area=3000, space_threshold=6) -> tuple:
+        """
+        Analiza una imagen de una celda para detectar caracteres y estimar la cantidad de palabras.
+
+        Parámetros: \n
+        celda_img : np.ndarray
+            Imagen en escala de grises de la celda a analizar. \n
+        th_min_area : int, opcional
+            Área mínima de un componente conectado para considerarlo un carácter válido (default: 30). \n
+        th_max_area : int, opcional
+            Área máxima de un componente conectado para considerarlo un carácter válido (default: 3000). \n
+        space_threshold : int, opcional
+            Distancia en píxeles entre componentes que se considera como separación entre palabras (default: 6). \n
+        Retorna la tupla (caracteres_validos,cantidad_palabras)
+        """
+
         padding = 3
         h, w = celda_img.shape
         if h <= 2 * padding or w <= 2 * padding:
             return 0, 0
         celda_recortada = celda_img[padding:h - padding, padding:w - padding]
         _, binary = cv2.threshold(celda_recortada, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, 8, cv2.CV_32S)
-        ix_area = (stats[:, -1] > th_min_area) & (stats[:, -1] < th_max_area)
-        stats = stats[ix_area, :]
-        caracteres_validos = len(stats - 1)
+        num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(binary, 8, cv2.CV_32S) # Conectividad de 8 vecinos para revisar píxeles diagonales. 
+        ix_area = (stats[:, -1] > th_min_area) & (stats[:, -1] < th_max_area) # Se filtran filas con componentes con áreas demasiado grandes o demasiado pequeñas. 
+        stats = stats[ix_area]
+        caracteres_validos = num_labels - 1 # Cantidad de componentes detectadas menos el fondo.
         if caracteres_validos == 0:
             return 0, 0
         sorted_stats = stats[np.argsort(stats[:, cv2.CC_STAT_LEFT])]
         palabras = 1
+        # Cálculo de distancias usando boundig box de las componentes. 
         for i in range(caracteres_validos - 1):
             x_i = sorted_stats[i, cv2.CC_STAT_LEFT]
             w_i = sorted_stats[i, cv2.CC_STAT_WIDTH]
@@ -36,13 +52,15 @@ def validar_formulario(chars_nombre, words_nombre,
                            chars_com, words_com,
                            chars_p1s, chars_p1n,
                            chars_p2s, chars_p2n,
-                           chars_p3s, chars_p3n):
+                           chars_p3s, chars_p3n) -> dict:
+        """Realiza las verificaciones de formato de cada campo 
+        basado en la cantidad de caracteres y palabras contenidos en cada uno."""
         val_nom = (words_nombre >= 2) and (chars_nombre <= 25)
         val_edad = (chars_edad > 1 and chars_edad <= 3) and (words_edad == 1)
         val_mail = (words_mail == 1) and (chars_mail <= 25)
         val_legajo = (chars_legajo == 8) and (words_legajo == 1)
         val_com = (words_com >= 1) and (chars_com <= 25)
-        val_p1 = (chars_p1s == 1) ^ (chars_p1n == 1)
+        val_p1 = (chars_p1s == 1) ^ (chars_p1n == 1) # Se usa el operador XOR que devuelve True si solo una de las condiciones es verdadera.
         val_p2 = (chars_p2s == 1) ^ (chars_p2n == 1)
         val_p3 = (chars_p3s == 1) ^ (chars_p3n == 1)
         form_completo = (val_nom and val_edad and val_mail and val_legajo and val_com and val_p1 and val_p2 and val_p3)
