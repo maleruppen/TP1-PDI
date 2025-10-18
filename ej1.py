@@ -23,8 +23,7 @@ def ecualizacion_local(img, M, N):
             ventana = img_padded[i:i+M, j:j+N]
 
             # Histograma local
-            #hist, bins = np.histogram(ventana.flatten(), 256, [0,256])
-            hist = cv2.calcHist([img], [0], None, [256], [0, 256])
+            hist = cv2.calcHist([ventana], [0], None, [256], [0, 256])
 
             # Normalizar y calcular CDF
             histn = hist.astype(np.double) / ventana.size
