@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # ---  Detección de Filas  ---
-img = cv2.imread('formulario_02.png', cv2.IMREAD_GRAYSCALE) 
+img = cv2.imread('formulario_03.png', cv2.IMREAD_GRAYSCALE) 
 img_zeros = img < 120
 img_row_zeros = img_zeros.sum(axis=1)
 
@@ -167,7 +167,7 @@ try:
     y1_com, y2_com = horizontal_lines[-2], horizontal_lines[-1]
     x1_com, x2_com = vertical_lines[1], vertical_lines[3]
     celda_com = img[y1_com:y2_com, x1_com:x2_com]
-    chars_com, words_comentarios = analizar_celda(celda_com, th_min_area=10)
+    chars_com, words_com = analizar_celda(celda_com, th_min_area=10)
 
     # --- "p1-si"  ---
     y1_p1s, y2_p1s = horizontal_lines[6], horizontal_lines[7]
@@ -233,7 +233,7 @@ try:
 
     plt.subplot(4, 4, 5)
     plt.imshow(celda_com, cmap='gray')
-    plt.title(f"'comentarios' (Detectados: {chars_com, words_comentarios})")
+    plt.title(f"'comentarios' (Detectados: {chars_com, words_com})")
     plt.axis('off')
 
     # --- preguntas -----
@@ -276,11 +276,15 @@ except IndexError:
     print("La detección de líneas falló. No se encontraron suficientes filas o columnas.")
     print(f"Líneas H: {len(horizontal_lines)}, Líneas V: {len(vertical_lines)}")
 
+#=====================================================
+# PUNTO A: MOSTRAR RESULTADOS POR PANTALLA
+#=====================================================
+
 def validar_formulario(chars_nombre, words_nombre, 
                        chars_edad, words_edad, 
                        chars_mail, words_mail, 
                        chars_legajo, words_legajo, 
-                       chars_comentarios, words_comentarios, 
+                       chars_com, words_com, 
                        chars_p1s, chars_p1n, 
                        chars_p2s, chars_p2n,
                        chars_p3s, chars_p3n):
@@ -292,7 +296,7 @@ def validar_formulario(chars_nombre, words_nombre,
         dict: Un diccionario con el resultado de la validación (True/False) para cada campo.
     """
 
-    # --- Lógica de Validación (Se devuelve True/False, no 'OK'/'MAL') ---
+    # --- Lógica de Validación (Se devuelve True/False) ---
 
     # a. Nombre y Apellido: Mín. 2 palabras, Máx. 25 caracteres.
     val_nom = (words_nombre >= 2) and (chars_nombre <= 25)
@@ -307,12 +311,15 @@ def validar_formulario(chars_nombre, words_nombre,
     val_legajo = (chars_legajo == 8) and (words_legajo == 1)
 
     # f. Comentarios: Mín. 1 palabra, Máx. 25 caracteres.
-    val_com = (words_comentarios >= 1) and (chars_comentarios <= 25)
+    val_com = (words_com >= 1) and (chars_com <= 25)
     
     # e. Preguntas 1, 2 y 3: Única celda marcada (Si=1 XOR No=1).
     val_p1 = (chars_p1s == 1) ^ (chars_p1n == 1) 
     val_p2 = (chars_p2s == 1) ^ (chars_p2n == 1)
     val_p3 = (chars_p3s == 1) ^ (chars_p3n == 1)
+
+    #Validacion del formulario
+    form_completo = (val_nom and val_edad and val_mail and val_legajo and val_com and val_p1 and val_p2 and val_p3)
 
     # --- Retorno de Resultados ---
     return {
@@ -324,12 +331,9 @@ def validar_formulario(chars_nombre, words_nombre,
         "Pregunta 2": val_p2,
         "Pregunta 3": val_p3,
         "Comentarios": val_com,
-        "FORMULARIO_COMPLETO_OK": (val_nom and val_edad and val_mail and val_legajo and val_com and val_p1 and val_p2 and val_p3)
+        "FORMULARIO_COMPLETO_OK": form_completo
     }
 
-# ----------------------------------------------------------------------
-# --- BLOQUE DE EJECUCIÓN 
-# ----------------------------------------------------------------------
 
 # Ejecutar la validación
 resultados_validacion = validar_formulario(
@@ -337,7 +341,7 @@ resultados_validacion = validar_formulario(
     chars_edad, words_edad, 
     chars_mail, words_mail, 
     chars_legajo, words_legajo, 
-    chars_com, words_comentarios, 
+    chars_com, words_com, 
     chars_p1s, chars_p1n, 
     chars_p2s, chars_p2n,
     chars_p3s, chars_p3n
@@ -348,9 +352,25 @@ print("\n--- RESULTADOS DE LA VALIDACIÓN ---")
 
 # Iteramos sobre el diccionario. 
 for campo, estado in resultados_validacion.items():
-    if campo != "FORMULARIO_COMPLETO_OK":
         # CONVERTIMOS True/False a OK/MAL
         estado_str = "OK" if estado else "MAL"
         print(f"> {campo}: {estado_str}")
         
-print("---------------------------------")
+#=======================================================
+# PUNTO C: imagen de salida que informe aquellas personas 
+# que han completado correctamente el formulario y aquellas 
+# personas que lo han completado de forma incorrecta.
+#==========================================================
+
+plt.figure(figsize=(12, 8))
+plt.suptitle("Informe de formularios completados", fontsize=16)
+plt.subplot(4, 4, 1) #vamos a tener que cambiar la posicion mientras iteramos por los form
+plt.imshow(img[y1_nom:y2_nom, vertical_lines[1]:vertical_lines[3]], cmap='gray')
+plt.title(f"Formulario completo : {resultados_validacion['FORMULARIO_COMPLETO_OK']}")
+plt.axis('off')
+plt.show()
+
+#========================================================
+# PUNTO D: D. Se debe generar un archivo CSV para almacenar 
+# los resultados de cada validación.
+#========================================================
