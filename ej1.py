@@ -21,20 +21,12 @@ def ecualizacion_local(img, M, N):
         for j in range(img.shape[1]):
             # Extraer ventana
             ventana = img_padded[i:i+M, j:j+N]
-
-            # Histograma local
-            #hist, bins = np.histogram(ventana.flatten(), 256, [0,256])
-            hist = cv2.calcHist([img], [0], None, [256], [0, 256])
-
-            # Normalizar y calcular CDF
-            histn = hist.astype(np.double) / ventana.size
-            cdf = histn.cumsum()
-
-            # Transformar píxel central
-            valor = img[i,j]
-            nuevo_valor = np.uint8(cdf[valor] * 255)
-
-            salida[i,j] = nuevo_valor
+            
+            # Ecualización de la ventana. 
+            ventana_ecualizada = cv2.equalizeHist(ventana)
+            
+            # El píxel central de la ventana ecualizada es nuestro nuevo valor
+            salida[i,j] = ventana_ecualizada[pad_M, pad_N] 
 
     return salida
 
@@ -44,7 +36,7 @@ img = cv2.imread("Imagen_con_detalles_escondidos.tif", cv2.IMREAD_GRAYSCALE)
 # Aplicar con distintas ventanas
 res_3x3 = ecualizacion_local(img, 3, 3)
 res_15x15 = ecualizacion_local(img, 15, 15)
-res_51x51 = ecualizacion_local(img, 60, 60)
+res_51x51 = ecualizacion_local(img, 51, 51)
 
 # Mostrar resultados (como en el apunte)
 plt.figure(figsize=(12,8))
