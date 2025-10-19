@@ -1,6 +1,6 @@
-# Trabajo Práctico 1 - Procesamiento de Imágenes I
+# Trabajo Práctico 1 - Procesamiento de Imágenes 
 
-Este repositorio contiene las soluciones para los dos ejercicios del Trabajo Práctico N° 1 de Procesamiento de Imágenes I (IA 4.4, TUIA, UNR).
+Este repositorio contiene las soluciones para los dos ejercicios del Trabajo Práctico N° 1 de Procesamiento de Imágenes.
 
 ## 📋 Prerrequisitos
 
